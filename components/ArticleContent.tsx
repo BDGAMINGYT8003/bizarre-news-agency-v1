@@ -1,4 +1,5 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Article } from '../types';
 
@@ -79,6 +80,64 @@ interface ArticleContentProps {
 }
 
 const ArticleContent: React.FC<ArticleContentProps> = ({ article, onBack }) => {
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'error'>('idle');
+
+  const handleShare = async () => {
+    const shareData = {
+      title: article.title,
+      text: article.excerpt,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        // User might have cancelled the share action, so we don't show an error.
+        console.log("Share action was cancelled or failed", err);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        setShareStatus('copied');
+        setTimeout(() => setShareStatus('idle'), 2000);
+      } catch (err) {
+        console.error('Failed to copy link: ', err);
+        setShareStatus('error');
+        setTimeout(() => setShareStatus('idle'), 2000);
+      }
+    }
+  };
+  
+  const getShareButtonContent = () => {
+    switch (shareStatus) {
+      case 'copied':
+        return (
+          <>
+            <i className="fa-solid fa-check"></i>
+            লিঙ্ক কপি হয়েছে!
+          </>
+        );
+      case 'error':
+        return (
+          <>
+            <i className="fa-solid fa-xmark"></i>
+            ত্রুটি হয়েছে
+          </>
+        );
+      case 'idle':
+      default:
+        return (
+          <>
+            <i className="fa-solid fa-share-nodes"></i>
+            শেয়ার করুন
+          </>
+        );
+    }
+  };
+
+
   return (
     <motion.div 
         initial={{ opacity: 0 }}
@@ -129,9 +188,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, onBack }) => {
                     <ReactionButton icon="🤔" label="চিন্তার বিষয়" />
                     <ReactionButton icon="😡" label="রেগে গেলাম" />
                 </div>
-                 <button className="mt-6 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center gap-3">
-                    <i className="fa-solid fa-share-nodes"></i>
-                    শেয়ার করুন
+                 <button 
+                    onClick={handleShare}
+                    className="mt-6 bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center gap-3 w-48 justify-center"
+                 >
+                    {getShareButtonContent()}
                 </button>
             </div>
         </div>

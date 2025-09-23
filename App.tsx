@@ -15,15 +15,39 @@ const App: React.FC = () => {
   useEffect(() => {
     // Simulate API call
     setArticles(mockArticles);
+
+    const handleHashChange = () => {
+      const hash = window.location.hash;
+      const match = hash.match(/^#\/article\/([\w-]+)$/);
+      if (match) {
+        const articleId = match[1];
+        const article = mockArticles.find(a => a.id === articleId);
+        if (article) {
+          setSelectedArticle(article);
+          window.scrollTo(0, 0);
+        } else {
+          // If article with given ID is not found, redirect to home
+          window.location.hash = '#/';
+        }
+      } else {
+        setSelectedArticle(null);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange(); // Initial check on page load
+
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   const handleArticleSelect = (article: Article) => {
-    setSelectedArticle(article);
-    window.scrollTo(0, 0);
+    window.location.hash = `#/article/${article.id}`;
   };
 
   const handleBack = () => {
-    setSelectedArticle(null);
+    window.location.hash = '#/';
   };
 
   const containerVariants = {
