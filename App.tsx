@@ -11,6 +11,7 @@ import Footer from './components/Footer';
 const App: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     // Simulate API call
@@ -60,10 +61,26 @@ const App: React.FC = () => {
     },
   };
 
+  const filteredArticles = articles.filter(article => {
+    const query = searchQuery.toLowerCase();
+    if (!query) return true;
+    return (
+      article.title.toLowerCase().includes(query) ||
+      article.excerpt.toLowerCase().includes(query) ||
+      article.content.toLowerCase().includes(query) ||
+      article.tags.some(tag => tag.toLowerCase().includes(query))
+    );
+  });
+
   return (
     <LayoutGroup>
       <div className="bg-black min-h-screen text-gray-100">
-        <Header onTitleClick={handleBack} />
+        <Header 
+            onTitleClick={handleBack} 
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            showSearch={!selectedArticle}
+        />
 
         <main>
           <AnimatePresence mode="wait">
@@ -81,20 +98,26 @@ const App: React.FC = () => {
                 exit={{ opacity: 0 }}
                 className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16"
               >
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                >
-                  {articles.map((article) => (
-                    <ArticleCard
-                      key={article.id}
-                      article={article}
-                      onClick={() => handleArticleSelect(article)}
-                    />
-                  ))}
-                </motion.div>
+                {filteredArticles.length > 0 ? (
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
+                    {filteredArticles.map((article) => (
+                        <ArticleCard
+                        key={article.id}
+                        article={article}
+                        onClick={() => handleArticleSelect(article)}
+                        />
+                    ))}
+                    </motion.div>
+                ) : (
+                    <div className="text-center py-20">
+                        <p className="text-xl text-gray-400">"{searchQuery}" এর জন্য কোনো ফলাফল পাওয়া যায়নি।</p>
+                    </div>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

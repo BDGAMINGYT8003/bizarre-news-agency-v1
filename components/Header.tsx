@@ -1,12 +1,15 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface HeaderProps {
     onTitleClick: () => void;
+    searchQuery: string;
+    onSearchChange: (query: string) => void;
+    showSearch: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ onTitleClick }) => {
+const Header: React.FC<HeaderProps> = ({ onTitleClick, searchQuery, onSearchChange, showSearch }) => {
     return (
         <motion.header
             initial={{ y: -100 }}
@@ -23,14 +26,35 @@ const Header: React.FC<HeaderProps> = ({ onTitleClick }) => {
                     >
                         আজগুবি বার্তা সংস্থা
                     </div>
-                    <div className="relative flex items-center">
-                        <i className="fa-solid fa-magnifying-glass absolute left-4 text-gray-500"></i>
-                        <input
-                            type="text"
-                            placeholder="অনুসন্ধান..."
-                            className="bg-gray-900/80 border border-gray-700 text-gray-200 rounded-full py-2 pl-12 pr-4 w-48 md:w-64 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
-                        />
-                    </div>
+                    <AnimatePresence>
+                        {showSearch && (
+                             <motion.div
+                                initial={{ opacity: 0, width: 0 }}
+                                animate={{ opacity: 1, width: 'auto' }}
+                                exit={{ opacity: 0, width: 0 }}
+                                transition={{ duration: 0.3 }}
+                                className="relative flex items-center"
+                            >
+                                <i className="fa-solid fa-magnifying-glass absolute left-4 text-gray-500 z-10"></i>
+                                <input
+                                    type="text"
+                                    placeholder="অনুসন্ধান..."
+                                    value={searchQuery}
+                                    onChange={(e) => onSearchChange(e.target.value)}
+                                    className="bg-gray-900/80 border border-gray-700 text-gray-200 rounded-full py-2 pl-12 pr-10 w-48 md:w-64 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-all duration-300"
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => onSearchChange('')}
+                                        className="absolute right-4 text-gray-500 hover:text-gray-200 transition-colors"
+                                        aria-label="Clear search"
+                                    >
+                                        <i className="fa-solid fa-xmark"></i>
+                                    </button>
+                                )}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
                 </div>
             </div>
         </motion.header>
