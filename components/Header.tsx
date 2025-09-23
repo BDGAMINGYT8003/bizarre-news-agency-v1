@@ -18,14 +18,16 @@ const Header: React.FC<HeaderProps> = ({ onTitleClick, searchQuery, onSearchChan
             className="fixed top-0 left-0 right-0 z-50 bg-black/50 backdrop-blur-lg"
         >
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex items-center justify-between h-20">
-                    <div
+                <div className={`flex items-center h-20 ${showSearch ? 'justify-between' : 'justify-center'}`}>
+                    <motion.div
+                        layout
+                        transition={{ duration: 0.3, ease: 'easeInOut' }}
                         className="text-2xl md:text-3xl font-bold text-gray-100 tracking-wider cursor-pointer"
                         onClick={onTitleClick}
                         style={{ fontFamily: "'Hind Siliguri', sans-serif" }}
                     >
                         আজগুবি বার্তা সংস্থা
-                    </div>
+                    </motion.div>
                     <AnimatePresence>
                         {showSearch && (
                              <motion.div
