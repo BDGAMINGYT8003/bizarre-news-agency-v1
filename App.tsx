@@ -7,15 +7,20 @@ import Header from './components/Header';
 import ArticleCard from './components/ArticleCard';
 import ArticleContent from './components/ArticleContent';
 import Footer from './components/Footer';
+import Pagination from './components/Pagination';
+import PasswordPrompt from './components/PasswordPrompt';
 
 const App: React.FC = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [selectedArticle, setSelectedArticle] = useState<Article | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [unlockingArticle, setUnlockingArticle] = useState<Article | null>(null);
 
   useEffect(() => {
-    // Simulate API call
-    setArticles(mockArticles);
+    // Simulate API call and sort articles by ID descending
+    const sortedArticles = [...mockArticles].sort((a, b) => parseInt(b.id, 10) - parseInt(a.id, 10));
+    setArticles(sortedArticles);
 
     const handleHashChange = () => {
       const hash = window.location.hash;
@@ -42,13 +47,45 @@ const App: React.FC = () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
   }, []);
+  
+  // Effect to add 'noindex' meta tag for secret articles
+  useEffect(() => {
+    if (selectedArticle?.isSecret) {
+        const meta = document.createElement('meta');
+        meta.id = 'noindex-meta-tag';
+        meta.name = 'robots';
+        meta.content = 'noindex';
+        document.head.appendChild(meta);
+        
+        return () => {
+            const tag = document.getElementById('noindex-meta-tag');
+            if (tag) {
+                tag.remove();
+            }
+        };
+    }
+  }, [selectedArticle]);
+
 
   const handleArticleSelect = (article: Article) => {
     window.location.hash = `#/article/${article.id}`;
   };
+  
+  const handleCardClick = (article: Article) => {
+    if (article.isSecret) {
+      setUnlockingArticle(article);
+    } else {
+      handleArticleSelect(article);
+    }
+  };
 
   const handleBack = () => {
     window.location.hash = '#/';
+  };
+  
+  const handleSearchChange = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1); // Reset to first page on new search
   };
 
   const containerVariants = {
@@ -71,6 +108,13 @@ const App: React.FC = () => {
       article.tags.some(tag => tag.toLowerCase().includes(query))
     );
   });
+  
+  // Pagination logic
+  const articlesPerPage = 10;
+  const indexOfLastArticle = currentPage * articlesPerPage;
+  const indexOfFirstArticle = indexOfLastArticle - articlesPerPage;
+  const currentArticles = filteredArticles.slice(indexOfFirstArticle, indexOfLastArticle);
+  const totalPages = Math.ceil(filteredArticles.length / articlesPerPage);
 
   return (
     <LayoutGroup>
@@ -78,9 +122,23 @@ const App: React.FC = () => {
         <Header 
             onTitleClick={handleBack} 
             searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
+            onSearchChange={handleSearchChange}
             showSearch={!selectedArticle}
         />
+
+        <AnimatePresence>
+            {unlockingArticle && (
+                <PasswordPrompt
+                    onSuccess={() => {
+                        if (unlockingArticle) {
+                            handleArticleSelect(unlockingArticle);
+                        }
+                        setUnlockingArticle(null);
+                    }}
+                    onCancel={() => setUnlockingArticle(null)}
+                />
+            )}
+        </AnimatePresence>
 
         <main>
           <AnimatePresence mode="wait">
@@ -99,20 +157,27 @@ const App: React.FC = () => {
                 className="container mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16"
               >
                 {filteredArticles.length > 0 ? (
-                    <motion.div
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                    >
-                    {filteredArticles.map((article) => (
-                        <ArticleCard
-                        key={article.id}
-                        article={article}
-                        onClick={() => handleArticleSelect(article)}
+                    <>
+                        <motion.div
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                        >
+                        {currentArticles.map((article) => (
+                            <ArticleCard
+                            key={article.id}
+                            article={article}
+                            onClick={() => handleCardClick(article)}
+                            />
+                        ))}
+                        </motion.div>
+                        <Pagination 
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            onPageChange={setCurrentPage}
                         />
-                    ))}
-                    </motion.div>
+                    </>
                 ) : (
                     <div className="text-center py-20">
                         <p className="text-xl text-gray-400">"{searchQuery}" এর জন্য কোনো ফলাফল পাওয়া যায়নি।</p>

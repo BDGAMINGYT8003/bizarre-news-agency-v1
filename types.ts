@@ -8,4 +8,5 @@ export interface Article {
   content: string; // Markdown content
   imageUrl: string;
   tags: string[];
+  isSecret?: boolean;
 }

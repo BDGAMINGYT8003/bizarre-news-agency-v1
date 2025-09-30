@@ -1,7 +1,7 @@
-
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Article } from '../types';
+import ArticleImage from './ArticleImage';
 
 // Standalone Helper Function for Markdown Parsing
 const parseInlineText = (text: string): React.ReactNode => {
@@ -79,6 +79,9 @@ interface ArticleContentProps {
   onBack: () => void;
 }
 
+// Wrap the custom ArticleImage component with motion to enable layout animations.
+const MotionArticleImage = motion(ArticleImage);
+
 const ArticleContent: React.FC<ArticleContentProps> = ({ article, onBack }) => {
   const [shareStatus, setShareStatus] = useState<'idle' | 'copied' | 'error'>('idle');
 
@@ -154,8 +157,9 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, onBack }) => {
         className="bg-gray-900 rounded-3xl overflow-hidden"
         layoutId={`article-container-${article.id}`}
       >
-        <motion.img
-          src={article.imageUrl}
+        <MotionArticleImage
+          articleId={article.id}
+          fallbackUrl={article.imageUrl}
           alt={article.title}
           className="w-full h-64 md:h-96 object-cover"
           layoutId={`article-image-${article.id}`}
