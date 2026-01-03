@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { motion } from 'framer-motion';
 
 interface PaginationProps {
   currentPage: number;
@@ -8,8 +8,7 @@ interface PaginationProps {
 }
 
 const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
-  // Only hide if there are no pages at all (e.g. no articles found in a search)
-  if (totalPages < 1) {
+  if (totalPages <= 1) {
     return null;
   }
 
@@ -26,31 +25,35 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
   };
   
   return (
-    <nav aria-label="Article navigation" className="flex justify-center items-center space-x-4 mt-7 -mb-1">
+    <motion.nav 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-center items-center space-x-6 mt-16 mb-4"
+        aria-label="Article navigation"
+    >
       <button
         onClick={handlePrevious}
         disabled={currentPage === 1}
-        className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 disabled:bg-gray-900 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+        className="w-12 h-12 rounded-full bg-surfaceHighlight border border-white/10 flex items-center justify-center text-gray-400 hover:bg-purple-600 hover:text-white hover:border-purple-500 disabled:opacity-30 disabled:hover:bg-surfaceHighlight disabled:hover:text-gray-400 transition-all duration-300"
         aria-label="Previous page"
       >
         <i className="fa-solid fa-chevron-left"></i>
-        <span>পূর্ববর্তী</span>
       </button>
 
-      <span className="text-gray-400 font-medium">
-        পৃষ্ঠা {currentPage} / {totalPages}
-      </span>
+      <div className="flex flex-col items-center">
+        <span className="text-2xl font-bold text-white font-sans">{currentPage}</span>
+        <span className="text-xs text-gray-500 uppercase tracking-wider font-bold">of {totalPages}</span>
+      </div>
 
       <button
         onClick={handleNext}
         disabled={currentPage === totalPages}
-        className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg hover:bg-gray-700 disabled:bg-gray-900 disabled:text-gray-600 disabled:cursor-not-allowed transition-colors duration-200 flex items-center gap-2"
+        className="w-12 h-12 rounded-full bg-surfaceHighlight border border-white/10 flex items-center justify-center text-gray-400 hover:bg-purple-600 hover:text-white hover:border-purple-500 disabled:opacity-30 disabled:hover:bg-surfaceHighlight disabled:hover:text-gray-400 transition-all duration-300"
         aria-label="Next page"
       >
-        <span>পরবর্তী</span>
         <i className="fa-solid fa-chevron-right"></i>
       </button>
-    </nav>
+    </motion.nav>
   );
 };
 

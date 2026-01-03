@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { motion } from 'framer-motion';
 
-// ForwardRef allows the component to receive a ref and forward it to a DOM element,
-// which is necessary for framer-motion to animate it.
 const ArticleImage = React.forwardRef<
     HTMLImageElement,
     {
@@ -11,8 +10,6 @@ const ArticleImage = React.forwardRef<
         className?: string;
     }
 >(({ articleId, fallbackUrl, alt, className }, ref) => {
-    // Memoize the array of potential local thumbnail sources.
-    // This list is only recalculated if the article ID changes.
     const potentialSources = useMemo(() => [
         `/thumbnails/article${articleId}.gif`,
         `/thumbnails/article${articleId}.png`,
@@ -21,33 +18,50 @@ const ArticleImage = React.forwardRef<
 
     const [sourceIndex, setSourceIndex] = useState(0);
     const [imageSrc, setImageSrc] = useState(potentialSources[0]);
+    const [isLoaded, setIsLoaded] = useState(false);
 
-    // This effect resets the image source whenever the articleId changes.
     useEffect(() => {
         setSourceIndex(0);
         setImageSrc(potentialSources[0]);
+        setIsLoaded(false);
     }, [potentialSources]);
 
     const handleError = () => {
         const nextIndex = sourceIndex + 1;
-        // If there's another local source to try, update the state.
         if (nextIndex < potentialSources.length) {
             setSourceIndex(nextIndex);
             setImageSrc(potentialSources[nextIndex]);
         } else {
-            // If all local sources have failed, use the final fallback URL.
             setImageSrc(fallbackUrl);
         }
     };
 
     return (
-        <img
-            ref={ref}
-            src={imageSrc}
-            alt={alt}
-            className={className}
-            onError={handleError}
-        />
+        <div className={`relative overflow-hidden bg-gray-900 ${className}`}>
+            {/* Skeleton Loader Overlay */}
+            {!isLoaded && (
+                <div className="absolute inset-0 bg-gray-800 animate-pulse z-10">
+                    <div className="h-full w-full bg-gradient-to-r from-transparent via-white/5 to-transparent animate-[shimmer_1.5s_infinite]"></div>
+                </div>
+            )}
+            
+            <motion.img
+                ref={ref}
+                src={imageSrc}
+                alt={alt}
+                className={`w-full h-full object-cover transition-opacity duration-700 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+                onError={handleError}
+                onLoad={() => setIsLoaded(true)}
+                loading="lazy"
+            />
+            
+            <style>{`
+                @keyframes shimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                }
+            `}</style>
+        </div>
     );
 });
 
