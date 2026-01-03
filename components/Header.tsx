@@ -6,9 +6,18 @@ interface HeaderProps {
     searchQuery: string;
     onSearchChange: (query: string) => void;
     showSearch: boolean;
+    showBackButton?: boolean;
+    onBack?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onTitleClick, searchQuery, onSearchChange, showSearch }) => {
+const Header: React.FC<HeaderProps> = ({ 
+    onTitleClick, 
+    searchQuery, 
+    onSearchChange, 
+    showSearch,
+    showBackButton,
+    onBack
+}) => {
     const [scrolled, setScrolled] = useState(false);
     const [searchFocused, setSearchFocused] = useState(false);
 
@@ -34,26 +43,44 @@ const Header: React.FC<HeaderProps> = ({ onTitleClick, searchQuery, onSearchChan
         >
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-full">
                 <div className="flex items-center justify-between h-full">
-                    {/* Logo Area */}
-                    <motion.div
-                        layout
-                        className="flex items-center gap-3 cursor-pointer group"
-                        onClick={onTitleClick}
-                    >
-                        <motion.div 
-                            whileHover={{ rotate: 180 }}
-                            transition={{ duration: 0.6 }}
-                            className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/20"
+                    {/* Left Area: Logo or Back Button */}
+                    <div className="flex items-center gap-3">
+                        {/* Mobile Back Button - Only visible if showBackButton is true on mobile */}
+                        <AnimatePresence mode="wait">
+                            {showBackButton && (
+                                <motion.button
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    exit={{ opacity: 0, x: -10 }}
+                                    onClick={onBack}
+                                    className="md:hidden flex items-center justify-center w-10 h-10 rounded-full bg-surfaceHighlight/50 text-white border border-white/10 hover:bg-surfaceHighlight transition-colors"
+                                >
+                                    <i className="fa-solid fa-arrow-left"></i>
+                                </motion.button>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Logo Area - Hidden on mobile if back button is active */}
+                        <motion.div
+                            layout
+                            className={`flex items-center gap-3 cursor-pointer group ${showBackButton ? 'hidden md:flex' : 'flex'}`}
+                            onClick={onTitleClick}
                         >
-                            <span className="text-white font-bold text-lg">আ</span>
+                            <motion.div 
+                                whileHover={{ rotate: 180 }}
+                                transition={{ duration: 0.6 }}
+                                className="w-8 h-8 bg-gradient-to-br from-purple-600 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-900/20"
+                            >
+                                <span className="text-white font-bold text-lg">আ</span>
+                            </motion.div>
+                            <h1 className={`font-heading font-bold text-gray-100 tracking-wide transition-all duration-300 ${scrolled ? 'text-xl' : 'text-2xl'}`}>
+                                <span className="md:hidden">আবাস</span>
+                                <span className="hidden md:inline">
+                                    আজগুবি<span className="text-purple-400">বার্তা</span>
+                                </span>
+                            </h1>
                         </motion.div>
-                        <h1 className={`font-heading font-bold text-gray-100 tracking-wide transition-all duration-300 ${scrolled ? 'text-xl' : 'text-2xl'}`}>
-                            <span className="md:hidden">আবাস</span>
-                            <span className="hidden md:inline">
-                                আজগুবি<span className="text-purple-400">বার্তা</span>
-                            </span>
-                        </h1>
-                    </motion.div>
+                    </div>
 
                     {/* Search Area */}
                     <div className="flex items-center gap-4">
@@ -64,7 +91,7 @@ const Header: React.FC<HeaderProps> = ({ onTitleClick, searchQuery, onSearchChan
                                     animate={{ opacity: 1, scaleX: 1 }}
                                     exit={{ opacity: 0, scaleX: 0.8 }}
                                     transition={{ duration: 0.3 }}
-                                    className={`relative flex items-center transition-all duration-300 ${searchFocused ? 'w-64 md:w-80' : 'w-48 md:w-64'}`}
+                                    className={`relative flex items-center transition-all duration-300 ${searchFocused ? 'w-48 sm:w-64 md:w-80' : 'w-32 sm:w-48 md:w-64'}`}
                                 >
                                     <i className={`fa-solid fa-magnifying-glass absolute left-4 z-10 transition-colors duration-300 ${searchFocused ? 'text-purple-400' : 'text-gray-500'}`}></i>
                                     <input

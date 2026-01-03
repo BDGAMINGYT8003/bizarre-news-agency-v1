@@ -160,6 +160,8 @@ const App: React.FC = () => {
               searchQuery={searchQuery}
               onSearchChange={handleSearchChange}
               showSearch={!selectedArticle}
+              showBackButton={!!selectedArticle}
+              onBack={handleBack}
           />
 
           {/* Password Modal */}

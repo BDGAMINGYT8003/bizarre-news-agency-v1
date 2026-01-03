@@ -134,13 +134,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, onBack }) => {
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-surface" />
             
-            {/* Back Button Floating */}
+            {/* Back Button Floating (Hidden on Mobile, handled by Header) */}
             <motion.button 
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3 }}
                 onClick={onBack} 
-                className="absolute top-6 left-6 md:top-10 md:left-10 z-20 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300"
+                className="hidden md:flex absolute top-6 left-6 md:top-10 md:left-10 z-20 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/20 items-center justify-center text-white hover:bg-white hover:text-black transition-all duration-300"
             >
                 <i className="fa-solid fa-arrow-left"></i>
             </motion.button>
