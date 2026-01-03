@@ -48,7 +48,10 @@ const Header: React.FC<HeaderProps> = ({ onTitleClick, searchQuery, onSearchChan
                             <span className="text-white font-bold text-lg">আ</span>
                         </motion.div>
                         <h1 className={`font-heading font-bold text-gray-100 tracking-wide transition-all duration-300 ${scrolled ? 'text-xl' : 'text-2xl'}`}>
-                            আজগুবি<span className="text-purple-400">বার্তা</span>
+                            <span className="md:hidden">আবাস</span>
+                            <span className="hidden md:inline">
+                                আজগুবি<span className="text-purple-400">বার্তা</span>
+                            </span>
                         </h1>
                     </motion.div>
 
